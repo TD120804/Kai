@@ -1,0 +1,282 @@
+import ollama
+
+from ddgs import DDGS
+
+
+# ==================================================
+# KAI DECIDES SEARCH STRATEGY
+# ==================================================
+
+def decide_search_strategy(
+    query
+):
+
+    prompt = f"""
+You are Kai.
+
+The user wants to understand this topic:
+
+"{query}"
+
+Think about what kinds of sources
+would best help explain this topic.
+
+Examples:
+
+ADHD:
+medical institutions,
+research papers,
+clinical sources
+
+Black holes:
+NASA,
+scientific explanations,
+educational sources
+
+Python decorators:
+official documentation,
+developer explanations
+
+ONLY return a short search strategy.
+
+Keep it natural.
+
+Topic:
+{query}
+"""
+
+    try:
+
+        response = ollama.chat(
+            model="qwen2.5:3b",
+            messages=[
+                {
+                    "role":
+                    "user",
+
+                    "content":
+                    prompt
+                }
+            ]
+        )
+
+        strategy = (
+            response[
+                "message"
+            ][
+                "content"
+            ]
+            .strip()
+        )
+
+        return strategy
+
+    except Exception as e:
+
+        print(
+            f"\nStrategy error: {e}"
+        )
+
+        return ""
+
+
+# ==================================================
+# RESEARCH TOPIC
+# ==================================================
+
+def research_topic(
+    query
+):
+
+    print(
+        f"\n🔎 Researching: {query}"
+    )
+
+    try:
+
+        # =====================================
+        # KAI THINKS FIRST
+        # =====================================
+
+        strategy = (
+            decide_search_strategy(
+                query
+            )
+        )
+
+        print(
+            f"\n🧠 Strategy: "
+            f"{strategy}"
+        )
+
+        improved_query = (
+            f"{query} "
+            f"{strategy}"
+        )
+
+        # =====================================
+        # SEARCH WEB
+        # =====================================
+
+        with DDGS() as ddgs:
+
+            search_results = list(
+                ddgs.text(
+                    improved_query,
+                    max_results=10
+                )
+            )
+
+        if not search_results:
+
+            return (
+                "I couldn't find "
+                "anything useful 😭"
+            )
+
+        research_text = ""
+
+        source_links = []
+
+        blocked_words = [
+
+            "torrent",
+            "download",
+            "hack",
+            "malware",
+            "exploit",
+            "pirated"
+        ]
+
+        valid_results = 0
+
+        for item in search_results:
+
+            if valid_results >= 5:
+                break
+
+            title = item.get(
+                "title",
+                ""
+            )
+
+            snippet = item.get(
+                "body",
+                ""
+            )
+
+            url = item.get(
+                "href",
+                ""
+            )
+
+            combined = (
+                f"{title} "
+                f"{snippet}"
+            ).lower()
+
+            # Skip junk
+            if any(
+                word in combined
+                for word in (
+                    blocked_words
+                )
+            ):
+                continue
+
+            research_text += (
+                f"Title: {title}\n"
+                f"Snippet: {snippet}\n\n"
+            )
+
+            source_links.append(
+                url
+            )
+
+            valid_results += 1
+
+        # =====================================
+        # KAI EXPLAINS
+        # =====================================
+
+        prompt = f"""
+You are Kai.
+
+Your job is to explain topics clearly.
+
+Topic:
+{query}
+
+Research:
+{research_text}
+
+Rules:
+- First understand the BIG idea
+- Explain what it ACTUALLY is
+- Ignore irrelevant details
+- Do not stitch random facts together
+- Maximum 120 words
+- Explain simply first
+- Sound intelligent and conversational
+- Prioritize clarity over complexity
+- No robotic wording
+- Tiny bit of Kai personality only
+
+Good explanation example:
+
+"Black holes are regions in space where gravity
+gets so intense that even light cannot escape 😭
+
+Most form when massive stars collapse.
+
+Scientists study them because they help us
+understand gravity and how the universe behaves."
+"""
+
+        response = ollama.chat(
+            model="qwen2.5:3b",
+            messages=[
+                {
+                    "role":
+                    "user",
+
+                    "content":
+                    prompt
+                }
+            ]
+        )
+
+        explanation = (
+            response[
+                "message"
+            ][
+                "content"
+            ]
+        )
+
+        # =====================================
+        # KEEP SOURCES (FOR FUTURE)
+        # =====================================
+
+        formatted_sources = (
+            "\n".join(
+                source_links[:5]
+            )
+        )
+
+        # Future:
+        # "show sources"
+        # "where did you get that?"
+
+        return explanation
+
+    except Exception as e:
+
+        print(
+            f"\nResearch error: {e}"
+        )
+
+        return (
+            "Something broke "
+            "while researching 😭"
+        )

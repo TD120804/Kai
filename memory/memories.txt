@@ -1,0 +1,16 @@
+
+[LONG_TERM_FACTS]
+- my exams are going to start next week
+
+[PREFERENCES]
+- 
+
+[PREFERENCES]
+- I like short answers
+
+[PROJECTS]
+- Kai v2 architecture
+
+[TASKS]
+- modularization
+- finish mememory system

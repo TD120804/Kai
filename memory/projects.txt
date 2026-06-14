@@ -1,0 +1,7 @@
+Current Project:
+Super Jarvis
+
+Status:
+- Kai voice working
+- Qwen2.5:3b integrated
+- Memory system in progress
