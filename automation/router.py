@@ -1,3 +1,10 @@
+from automation.spotify_control import (
+    play_song,
+    pause_music,
+    next_song,
+    previous_song
+)
+
 from automation.app_control import (
     open_app
 )
@@ -148,6 +155,72 @@ def handle_automation(
         return (
             True,
             result
+        )
+
+    # ==========================================
+    # SPOTIFY CONTROL
+    # ==========================================
+
+    if text.startswith(
+        "play "
+    ):
+
+        song = (
+            text
+            .replace(
+                "play",
+                "",
+                1
+            )
+            .strip()
+        )
+
+        play_song(
+            song
+        )
+
+        return (
+            True,
+            f"Playing {song}."
+        )
+
+    if (
+        "pause music" in text
+        or
+        "pause spotify" in text
+    ):
+
+        pause_music()
+
+        return (
+            True,
+            "Paused music."
+        )
+
+    if (
+        "next song" in text
+        or
+        "skip song" in text
+    ):
+
+        next_song()
+
+        return (
+            True,
+            "Skipping."
+        )
+
+    if (
+        "previous song" in text
+        or
+        "last song" in text
+    ):
+
+        previous_song()
+
+        return (
+            True,
+            "Going back."
         )
 
     # ==========================================

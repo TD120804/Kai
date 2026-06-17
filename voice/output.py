@@ -1,4 +1,4 @@
-import asyncio
+'''import asyncio
 import edge_tts
 import tempfile
 import subprocess
@@ -69,4 +69,10 @@ def speak(text):
 
         print(
             f"\nVoice error: {e}"
-        )
+        )'''
+
+def speak(text):
+
+    print(
+        f"\n🖤 KAI: {text}\n"
+    )
