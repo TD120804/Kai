@@ -1,3 +1,8 @@
+from automation.lock_in import (
+    start_lock_in,
+    stop_lock_in
+)
+
 from automation.spotify_control import (
     play_song,
     pause_music,
@@ -155,6 +160,26 @@ def handle_automation(
         return (
             True,
             result
+        )
+
+    # ==========================================
+    # LOCK IN MODE
+    # ==========================================
+
+    if text == "lock in":
+
+        return (
+            start_lock_in()
+        )
+
+    if (
+        text == "stop lock in"
+        or
+        text == "im done studying"
+    ):
+
+        return (
+            stop_lock_in()
         )
 
     # ==========================================
