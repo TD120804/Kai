@@ -145,13 +145,13 @@ return Scaffold(
       // KAI
       // =========================
       Positioned(
-        top: h * 0.08,
+        top: h * 0.15,
         left: 0,
         right: 0,
         child: Center(
           child: Image.asset(
             'assets/images/kai_home.png',
-            height: h * 0.89,
+            height: h * 1.1,
             fit: BoxFit.contain,
           ),
         ),
@@ -161,7 +161,7 @@ return Scaffold(
       // DIVIDER
       // =========================
       Positioned(
-        bottom: h * 0.18,
+        bottom: h * 0.35,
         left: 0,
         right: 0,
         child: Center(
