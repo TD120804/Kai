@@ -1,15 +1,73 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
   @override
+  State<ChatScreen> createState() =>
+      _ChatScreenState();
+}
+
+class _ChatScreenState
+    extends State<ChatScreen> {
+
+  String kaiMessage =
+      "Good evening, Commander.\n\nWhat shall we accomplish today?";
+
+  bool isLoading = false;
+
+  final TextEditingController
+      messageController =
+          TextEditingController();
+
+  Future<void> sendMessage() async {
+
+    final message =
+        messageController.text.trim();
+
+    if (message.isEmpty) return;
+
+    messageController.clear();
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+
+      final response =
+          await ApiService.sendMessage(
+        message,
+      );
+
+      setState(() {
+        kaiMessage = response;
+        isLoading = false;
+      });
+
+    } catch (e) {
+
+      setState(() {
+        kaiMessage =
+            "Connection error.\n$e";
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
-    final w = MediaQuery.of(context).size.width;
+
+    final h =
+        MediaQuery.of(context).size.height;
+
+    final w =
+        MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080D16),
+      backgroundColor:
+          const Color(0xFF080D16),
 
       body: Stack(
         children: [
@@ -27,12 +85,14 @@ class ChatScreen extends StatelessWidget {
 
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.60),
+              color: Colors.black.withOpacity(
+                0.60,
+              ),
             ),
           ),
 
           // ==========================
-          // SOFT BRONZE GLOW
+          // BRONZE GLOW
           // ==========================
 
           Positioned(
@@ -43,13 +103,16 @@ class ChatScreen extends StatelessWidget {
               child: Container(
                 width: 600,
                 height: 600,
+
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
+
                   boxShadow: [
                     BoxShadow(
                       color: const Color(
                         0xFFB08D57,
                       ).withOpacity(0.12),
+
                       blurRadius: 220,
                       spreadRadius: 60,
                     ),
@@ -66,18 +129,24 @@ class ChatScreen extends StatelessWidget {
           const Positioned(
             top: 40,
             left: 50,
+
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
+
               children: [
 
                 Text(
                   "KAI",
+
                   style: TextStyle(
-                    color: Color(0xFFD8B273),
+                    color:
+                        Color(0xFFD8B273),
+
                     fontSize: 32,
                     letterSpacing: 8,
-                    fontWeight: FontWeight.w300,
+                    fontWeight:
+                        FontWeight.w300,
                   ),
                 ),
 
@@ -85,8 +154,11 @@ class ChatScreen extends StatelessWidget {
 
                 Text(
                   "ONLINE ●",
+
                   style: TextStyle(
-                    color: Colors.white70,
+                    color:
+                        Colors.white70,
+
                     fontSize: 12,
                     letterSpacing: 3,
                   ),
@@ -96,8 +168,11 @@ class ChatScreen extends StatelessWidget {
 
                 Text(
                   "EXECUTIVE AI",
+
                   style: TextStyle(
-                    color: Colors.white38,
+                    color:
+                        Colors.white38,
+
                     fontSize: 10,
                     letterSpacing: 3,
                   ),
@@ -114,9 +189,11 @@ class ChatScreen extends StatelessWidget {
             top: 10,
             left: 0,
             right: 0,
+
             child: Center(
               child: Image.asset(
                 'assets/images/kai_chat.png',
+
                 height: h * 0.72,
                 fit: BoxFit.contain,
               ),
@@ -137,6 +214,7 @@ class ChatScreen extends StatelessWidget {
 
               child: Stack(
                 clipBehavior: Clip.none,
+
                 children: [
 
                   Positioned.fill(
@@ -146,24 +224,23 @@ class ChatScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Ornament
-
                   Positioned(
                     top: -25,
                     left: 30,
+
                     child: Image.asset(
                       'assets/images/divider.png',
                       width: 200,
                     ),
                   ),
 
-                  // Emblem
-
                   Positioned(
                     right: 65,
                     top: 18,
+
                     child: Opacity(
                       opacity: 0.12,
+
                       child: Image.asset(
                         'assets/images/emblem.png',
                         width: 120,
@@ -177,16 +254,20 @@ class ChatScreen extends StatelessWidget {
 
                     child: Text(
                       "KAI",
+
                       style: TextStyle(
-                        color: Color(0xFFD8B273),
+                        color:
+                            Color(0xFFD8B273),
+
                         fontSize: 20,
                         letterSpacing: 4,
-                        fontWeight: FontWeight.w300,
+                        fontWeight:
+                            FontWeight.w300,
                       ),
                     ),
                   ),
 
-                  const Positioned(
+                  Positioned(
                     left: 55,
                     top: 55,
 
@@ -194,11 +275,18 @@ class ChatScreen extends StatelessWidget {
                       width: 700,
 
                       child: Text(
-                        "Good evening, Commander.\n\nWhat shall we accomplish today?",
-                        style: TextStyle(
-                          color: Colors.white,
+                        isLoading
+                            ? "Kai is thinking..."
+                            : kaiMessage,
+
+                        style:
+                            const TextStyle(
+                          color:
+                              Colors.white,
+
                           fontSize: 14,
                           height: 1.5,
+
                           fontWeight:
                               FontWeight.w300,
                         ),
@@ -223,14 +311,19 @@ class ChatScreen extends StatelessWidget {
               height: 60,
 
               decoration: BoxDecoration(
-                color: const Color(0xFF0E121A),
+                color:
+                    const Color(0xFF0E121A),
 
                 borderRadius:
-                    BorderRadius.circular(12),
+                    BorderRadius.circular(
+                  12,
+                ),
 
                 border: Border.all(
                   color:
-                      const Color(0xFFB08D57),
+                      const Color(
+                    0xFFB08D57,
+                  ),
                   width: 1,
                 ),
               ),
@@ -238,17 +331,29 @@ class ChatScreen extends StatelessWidget {
               child: Row(
                 children: [
 
-                  const SizedBox(width: 20),
+                  const SizedBox(
+                    width: 20,
+                  ),
 
-                  const Expanded(
+                  Expanded(
                     child: TextField(
-                      style: TextStyle(
-                        color: Colors.white,
+                      controller:
+                          messageController,
+
+                      style:
+                          const TextStyle(
+                        color:
+                            Colors.white,
+
                         fontSize: 15,
                       ),
 
+                      onSubmitted: (_) {
+                        sendMessage();
+                      },
+
                       decoration:
-                          InputDecoration(
+                          const InputDecoration(
                         border:
                             InputBorder.none,
 
@@ -267,6 +372,7 @@ class ChatScreen extends StatelessWidget {
                   Container(
                     width: 50,
                     height: 50,
+
                     margin:
                         const EdgeInsets.only(
                       right: 8,
@@ -277,7 +383,8 @@ class ChatScreen extends StatelessWidget {
                       shape:
                           BoxShape.circle,
 
-                      border: Border.all(
+                      border:
+                          Border.all(
                         color:
                             const Color(
                           0xFFB08D57,
@@ -285,10 +392,18 @@ class ChatScreen extends StatelessWidget {
                       ),
                     ),
 
-                    child: const Icon(
-                      Icons.arrow_forward,
-                      color:
-                          Color(0xFFD8B273),
+                    child: IconButton(
+                      onPressed:
+                          sendMessage,
+
+                      icon: const Icon(
+                        Icons.arrow_forward,
+
+                        color:
+                            Color(
+                          0xFFD8B273,
+                        ),
+                      ),
                     ),
                   ),
                 ],
