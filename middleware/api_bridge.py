@@ -2,6 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+
+from security.pipeline import (
+    SecurityPipeline
+)
+
 from brain.conversation import (
     generate_response
 )
@@ -55,6 +60,69 @@ def chat(request: ChatRequest):
     user_input = (
         request.message
     )
+
+    # ======================================
+    # SECURITY PIPELINE
+    # ======================================
+
+    security = (
+        SecurityPipeline.process(
+            user_input
+        )
+    )
+
+    if not security.success:
+
+        return {
+            "response": security.error
+        }
+
+    user_input = (
+        security.message
+    )
+
+    # ======================================
+    # MEMORY
+    # ======================================
+
+    handled, response = (
+        handle_memory_command(
+            user_input
+        )
+    )
+
+    if handled:
+
+        return {
+            "response": response
+        }
+
+    # ======================================
+    # AUTOMATION
+    # ======================================
+
+    handled, response = (
+        handle_automation(
+            user_input
+        )
+    )
+
+    if handled:
+
+        return {
+            "response": response
+        }
+
+    # ======================================
+    # NORMAL CHAT
+    # ======================================
+
+    return {
+        "response":
+        generate_response(
+            user_input
+        )
+    }
 
     # ======================================
     # MEMORY
