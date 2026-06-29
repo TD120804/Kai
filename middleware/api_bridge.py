@@ -1,16 +1,19 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import ollama
+from pydantic import BaseModel
+
+from brain.conversation import (
+    generate_response
+)
 
 from memory.memory_manager import (
-    load_system_prompt,
     handle_memory_command
 )
 
 from automation.router import (
     handle_automation
 )
+
 
 # ==========================================
 # APP
@@ -19,100 +22,31 @@ from automation.router import (
 app = FastAPI()
 
 app.add_middleware(
+
     CORSMiddleware,
+
     allow_origins=["*"],
+
     allow_credentials=True,
+
     allow_methods=["*"],
+
     allow_headers=["*"],
+
 )
 
-# ==========================================
-# CONFIG
-# ==========================================
-
-MODEL_NAME = "qwen2.5:3b"
-
-TEMPERATURE = 0.95
-TOP_P = 0.9
-NUM_PREDICT = 100
-
-MAX_HISTORY = 6
-
-# ==========================================
-# SYSTEM PROMPT
-# ==========================================
-
-SYSTEM_PROMPT = (
-    load_system_prompt()
-)
-
-# ==========================================
-# CONVERSATION
-# ==========================================
-
-conversation = [
-    {
-        "role": "system",
-        "content": SYSTEM_PROMPT
-    }
-]
 
 # ==========================================
 # REQUEST MODEL
 # ==========================================
 
 class ChatRequest(BaseModel):
+
     message: str
 
-# ==========================================
-# RESPONSE GENERATION
-# ==========================================
-
-def generate_response(user_input):
-
-    conversation.append(
-        {
-            "role": "user",
-            "content": user_input
-        }
-    )
-
-    messages_to_send = (
-        [conversation[0]]
-        +
-        conversation[-MAX_HISTORY:]
-    )
-
-    response = ollama.chat(
-        model=MODEL_NAME,
-        messages=messages_to_send,
-        options={
-            "temperature":
-            TEMPERATURE,
-
-            "num_predict":
-            NUM_PREDICT,
-
-            "top_p":
-            TOP_P
-        }
-    )
-
-    kai_reply = (
-        response["message"]["content"]
-    )
-
-    conversation.append(
-        {
-            "role": "assistant",
-            "content": kai_reply
-        }
-    )
-
-    return kai_reply
 
 # ==========================================
-# CHAT ENDPOINT
+# CHAT
 # ==========================================
 
 @app.post("/chat")
@@ -122,9 +56,9 @@ def chat(request: ChatRequest):
         request.message
     )
 
-    # ==========================
+    # ======================================
     # MEMORY
-    # ==========================
+    # ======================================
 
     handled, response = (
         handle_memory_command(
@@ -138,9 +72,9 @@ def chat(request: ChatRequest):
             "response": response
         }
 
-    # ==========================
+    # ======================================
     # AUTOMATION
-    # ==========================
+    # ======================================
 
     handled, response = (
         handle_automation(
@@ -154,27 +88,55 @@ def chat(request: ChatRequest):
             "response": response
         }
 
-    # ==========================
+    # ======================================
     # NORMAL CHAT
-    # ==========================
+    # ======================================
 
-    kai_reply = (
+    return {
+        "response":
         generate_response(
             user_input
         )
-    )
-
-    return {
-        "response": kai_reply
     }
 
+
 # ==========================================
-# HEALTH CHECK
+# ROOT
 # ==========================================
 
 @app.get("/")
 def root():
 
     return {
-        "status": "Kai Online"
+
+        "status": "online",
+
+        "assistant": "Kai",
+
+        "version": "0.1.0"
+
+    }
+
+
+# ==========================================
+# STATUS
+# ==========================================
+
+@app.get("/status")
+def status():
+
+    return {
+
+        "online": True,
+
+        "assistant": "Kai",
+
+        "model": "qwen2.5:3b",
+
+        "memory": True,
+
+        "automation": True,
+
+        "api": True
+
     }

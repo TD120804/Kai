@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import '../services/kai_api_service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -37,7 +37,7 @@ class _ChatScreenState
     try {
 
       final response =
-          await ApiService.sendMessage(
+          await KaiApiService.sendMessage(
         message,
       );
 
